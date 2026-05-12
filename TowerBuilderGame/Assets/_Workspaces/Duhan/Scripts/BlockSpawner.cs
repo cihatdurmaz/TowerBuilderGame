@@ -2,10 +2,13 @@ using UnityEngine;
 
 public class BlockSpawner : MonoBehaviour
 {
-    [Header("Üretim Ayarlarý")]
-    // DÝKKAT: Artýk köþeli parantez [] ile bir dizi oluþturduk.
+    [Header("Oyuncu ve Üretim Ayarlarý")]
+    public int playerID = 1;
     [SerializeField] private GameObject[] blockPrefabs;
-    [SerializeField] private float spawnHeightOffset = 6f;
+    [SerializeField] private Transform spawnPoint;
+
+    // YENÝ: Spawner aktif mi?
+    [HideInInspector] public bool canSpawn = true;
 
     void Start()
     {
@@ -14,13 +17,17 @@ public class BlockSpawner : MonoBehaviour
 
     public void SpawnBlock()
     {
-        float spawnY = Camera.main.transform.position.y + spawnHeightOffset;
-        Vector3 finalSpawnPosition = new Vector3(0, spawnY, 0);
+        // Eðer oyuncu elendiyse yeni blok üretme!
+        if (!canSpawn) return;
 
-        // 0 ile dizideki eleman sayýsý arasýnda rastgele bir sayý seç
         int randomIndex = Random.Range(0, blockPrefabs.Length);
+        GameObject newBlock = Instantiate(blockPrefabs[randomIndex], spawnPoint.position, Quaternion.identity);
 
-        // Seçilen rastgele þekli üret
-        Instantiate(blockPrefabs[randomIndex], finalSpawnPosition, Quaternion.identity);
+        BlockController controller = newBlock.GetComponent<BlockController>();
+        if (controller != null)
+        {
+            controller.playerID = this.playerID;
+            controller.mySpawner = this;
+        }
     }
 }
