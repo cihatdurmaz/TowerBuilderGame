@@ -20,27 +20,35 @@ public class BlockController : MonoBehaviour
         rb.constraints = RigidbodyConstraints2D.FreezePositionX | RigidbodyConstraints2D.FreezeRotation;
     }
 
+
     void Update()
     {
         if (isLanded) return;
 
         transform.position += Vector3.down * fallSpeed * Time.deltaTime;
 
-        // --- YENÝ: OYUNCU GÝRÝÞLERÝ AYRILDI ---
-        if (playerID == 1) // 1. OYUNCU (A ve D)
+        // Hem bilgisayar testleri için klavye açýk kalýyor hem de yeni fonksiyonlarý çaðýrýyoruz
+        if (playerID == 1)
         {
-            if (Input.GetKeyDown(KeyCode.A))
-                transform.position += new Vector3(-gridSize, 0, 0);
-            else if (Input.GetKeyDown(KeyCode.D))
-                transform.position += new Vector3(gridSize, 0, 0);
+            if (Input.GetKeyDown(KeyCode.A)) MoveLeft();
+            else if (Input.GetKeyDown(KeyCode.D)) MoveRight();
         }
-        else if (playerID == 2) // 2. OYUNCU (Sol ve Sað Ok)
+        else if (playerID == 2)
         {
-            if (Input.GetKeyDown(KeyCode.LeftArrow))
-                transform.position += new Vector3(-gridSize, 0, 0);
-            else if (Input.GetKeyDown(KeyCode.RightArrow))
-                transform.position += new Vector3(gridSize, 0, 0);
+            if (Input.GetKeyDown(KeyCode.LeftArrow)) MoveLeft();
+            else if (Input.GetKeyDown(KeyCode.RightArrow)) MoveRight();
         }
+    }
+
+    // YENÝ: Mobil butonlarýn da tetikleyebilmesi için hareketleri dýþa (public) açtýk
+    public void MoveLeft()
+    {
+        if (!isLanded) transform.position += new Vector3(-gridSize, 0, 0);
+    }
+
+    public void MoveRight()
+    {
+        if (!isLanded) transform.position += new Vector3(gridSize, 0, 0);
     }
 
     private void OnCollisionEnter2D(Collision2D collision)

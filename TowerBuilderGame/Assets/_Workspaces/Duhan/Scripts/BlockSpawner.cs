@@ -7,17 +7,12 @@ public class BlockSpawner : MonoBehaviour
     [SerializeField] private GameObject[] blockPrefabs;
     [SerializeField] private Transform spawnPoint;
 
-    // YENÝ: Spawner aktif mi?
     [HideInInspector] public bool canSpawn = true;
 
-    void Start()
-    {
-        SpawnBlock();
-    }
+    // --- void Start() KISMI TAMAMEN SÝLÝNDÝ ---
 
     public void SpawnBlock()
     {
-        // Eðer oyuncu elendiyse yeni blok üretme!
         if (!canSpawn) return;
 
         int randomIndex = Random.Range(0, blockPrefabs.Length);
@@ -28,6 +23,10 @@ public class BlockSpawner : MonoBehaviour
         {
             controller.playerID = this.playerID;
             controller.mySpawner = this;
+
+            // YENÝ: Doðan bloðu GameManager'a bildir!
+            if (this.playerID == 1) GameManager.instance.activeBlockP1 = controller;
+            else if (this.playerID == 2) GameManager.instance.activeBlockP2 = controller;
         }
     }
 }

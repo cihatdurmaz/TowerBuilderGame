@@ -2,30 +2,55 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    // Static deðiþken: Sahnede tek bir tane bulunur ve tüm bloklar buna kolayca ulaþabilir.
-    public static float highestY = -4f;
+    private string gameMode;
+    private float startY;
 
-    [Header("Kamera Ayarlarý")]
-    [SerializeField] private float smoothSpeed = 3f; // Kameranýn yukarý kayma yumuþaklýðý
-    [SerializeField] private float yOffset = 2f; // Kameranýn bloðun ne kadar üstüne bakacaðý
+    [Header("Takip Ayarlarý")]
+    public float offsetY = 0f;
+    public float smoothSpeed = 5f;
 
-    private float minY; // Kameranýn inebileceði en alt nokta (baþlangýç noktasý)
+    [Header("Üreticiler (Spawner)")]
+    public Transform spawnerP1;
+    public Transform spawnerP2;
+    private float spawnerOffset;
 
-    private void Start()
+    void Start()
     {
-        // Oyuna her baþladýðýmýzda veya yandýðýmýzda deðiþkeni sýfýrlýyoruz.
-        highestY = -4f;
-        minY = transform.position.y;
+        gameMode = PlayerPrefs.GetString("GameMode", "HeightMode");
+        startY = transform.position.y;
+
+        // Oyun baþlarken Spawner'ýn kameradan ne kadar yukarýda olduðunu hesapla
+        if (spawnerP1 != null)
+            spawnerOffset = spawnerP1.position.y - startY;
     }
 
-    private void Update()
+    void LateUpdate()
     {
-        // Hedef yüksekliði belirle. (Mathf.Max sayesinde kule devrilse bile kamera aþaðý inmez, yukarýda kalýr).
-        float targetY = Mathf.Max(minY, highestY + yOffset);
+        // Sadece "En Yükseðe Çýk" modunda kamerayý hareket ettir
+        if (gameMode == "HeightMode")
+        {
+            float highestBlockY = startY;
 
-        Vector3 targetPosition = new Vector3(transform.position.x, targetY, transform.position.z);
+            BlockController[] blocks = FindObjectsOfType<BlockController>();
+            foreach (BlockController block in blocks)
+            {
+                if (block.isLanded && block.transform.position.y > highestBlockY)
+                {
+                    highestBlockY = block.transform.position.y;
+                }
+            }
 
-        // Lerp komutu, kameranýn aniden ýþýnlanmasý yerine sinematik ve pürüzsüz bir þekilde yukarý kaymasýný saðlar.
-        transform.position = Vector3.Lerp(transform.position, targetPosition, smoothSpeed * Time.deltaTime);
+            float targetY = highestBlockY + offsetY;
+
+            if (targetY > transform.position.y)
+            {
+                Vector3 targetPos = new Vector3(transform.position.x, targetY, transform.position.z);
+                transform.position = Vector3.Lerp(transform.position, targetPos, smoothSpeed * Time.deltaTime);
+
+                // Üreticileri de kamerayla ayný hizayý koruyarak yukarý taþý
+                if (spawnerP1 != null) spawnerP1.position = new Vector3(spawnerP1.position.x, transform.position.y + spawnerOffset, spawnerP1.position.z);
+                if (spawnerP2 != null) spawnerP2.position = new Vector3(spawnerP2.position.x, transform.position.y + spawnerOffset, spawnerP2.position.z);
+            }
+        }
     }
 }
